@@ -19,7 +19,8 @@ export interface RegisterAuthDto {
   phoneNumber: string;
   password: string;
   fullName: string;
-  birthDay: number;
+  birthDate: number;
+  email: string;
 }
 
 export interface SessionUserModel {
@@ -39,6 +40,8 @@ export interface AuthResp {
 
 export const AUTHENTICATION_PACKAGE_NAME = "authentication";
 
+/** AUTH SERVICE */
+
 export interface AuthServiceClient {
   logIn(request: LoginAuthDto): Observable<AuthResp>;
 
@@ -48,6 +51,8 @@ export interface AuthServiceClient {
 
   refreshToken(request: SessionUserModel): Observable<AuthResp>;
 }
+
+/** AUTH SERVICE */
 
 export interface AuthServiceController {
   logIn(request: LoginAuthDto): Promise<AuthResp> | Observable<AuthResp> | AuthResp;

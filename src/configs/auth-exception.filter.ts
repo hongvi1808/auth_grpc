@@ -1,12 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { ResErrorModel } from './res-error.model';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger, RpcExceptionFilter } from '@nestjs/common';
+import { throwError } from 'rxjs';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @Catch()
-export class AuthExceptionFilter implements ExceptionFilter {
-    constructor(private readonly code?: string, private readonly message?: string, private readonly data?: any) { }
-    catch(exception: AuthExceptionFilter, host: ArgumentsHost) {
-        const ctx = host.switchToRpc();
-        const response = ctx.getData()
+export class AuthExceptionFilter implements RpcExceptionFilter {
+    constructor(private readonly code?: string, private readonly message?: string) { }
+    catch(exception: any, host: ArgumentsHost) {
         // Log the error details
         Logger.error(
             `Message: ${exception.message}`,
@@ -15,16 +15,15 @@ export class AuthExceptionFilter implements ExceptionFilter {
         );
 
         // Create the error response object
-        const errorResponse: ResErrorModel = {
-            success: false,
+        const errorResponse = {
             code: exception.code || 'AUTH_ERROR',
-            statusCode: response.status || HttpStatus.UNAUTHORIZED,
             message: exception.message || 'Error from authen service',
-            error: 'AuthExceptionFilter',
-            data: exception.data || response.data || null,
         }
-        response
-            .status(errorResponse.statusCode)
-            .json(errorResponse);
+
+        // Trả về lỗi dạng gRPC
+        return throwError(() => ({
+            code: exception.status || status.INTERNAL,
+            message: JSON.stringify(errorResponse), // Chuyển object thành JSON string
+        }));
     }
 }

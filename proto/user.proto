@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package user;
+
+// USER SERVICE
+service UserService {
+    rpc createUser (CreateUserDto) returns (CreateUserResp);
+    rpc getUserById (FilterParam) returns (UserResp);
+    rpc getUsers (FilterParam) returns (UserResp);
+}
+message CreateUserDto {
+    string fullName = 1;
+    string phoneNumber = 3;
+    string email = 4;
+    int32 birthDate = 5;
+    string role = 6;
+}
+message CreateUserResp {
+    string fullName = 1;
+    string password = 2;
+    string username = 3;
+}
+message UserResp {
+    string id = 1;
+    string fullName = 2;
+    string phoneNumber = 3;
+    string email = 4;
+    int32 birthDate = 5;
+    string role = 6;
+}
+message FilterParam {
+    string id = 1;
+}

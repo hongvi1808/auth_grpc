@@ -13,7 +13,8 @@ export class AuthController implements AuthServiceController {
     return result
   }
   register(request: RegisterAuthDto): Promise<AuthResp> | Observable<AuthResp> | AuthResp {
-    throw new Error('Method not implemented.');
+    const result =  this.authService.register(request)
+    return result
   }
   refreshToken(request: SessionUserModel): Promise<AuthResp> | Observable<AuthResp> | AuthResp {
     throw new Error('Method not implemented.');
