@@ -1,6 +1,5 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger, RpcExceptionFilter } from '@nestjs/common';
+import { ArgumentsHost, Catch, Logger, RpcExceptionFilter } from '@nestjs/common';
 import { throwError } from 'rxjs';
-import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 
 @Catch()
