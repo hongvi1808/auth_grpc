@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package authentication;
+
+service AuthService {
+    rpc logIn (LoginAuthDto) returns (AuthResp);
+    rpc register (RegisterAuthDto) returns (AuthResp);
+    rpc refreshToken (SessionUserModel) returns (AuthResp);
+    // rpc logout (SessionUserModel) returns (bool);
+}
+message LoginAuthDto {
+    string phoneNumber = 1;
+    string password = 2;
+}
+message RegisterAuthDto {
+    string phoneNumber = 1;
+    string password = 2;
+    string fullName = 3;
+    int32 birthDay = 4;
+
+}
+message SessionUserModel {
+    string sid = 1;
+    string userId = 2;
+    string sub = 3;
+    string role = 4;
+    string username = 5;
+}
+message AuthResp {
+    string accessToken = 1;
+    string refreshToken = 2;
+    int32 expiredAt = 3;
+    string userId = 4;
+}
