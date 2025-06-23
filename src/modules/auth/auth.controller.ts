@@ -12,7 +12,7 @@ export class AuthController implements AuthServiceController {
     const result =  this.authService.logIn(request)
     return result
   }
-  register(request: RegisterAuthDto): Promise<AuthResp> | Observable<AuthResp> | AuthResp {
+  async register(request: RegisterAuthDto): Promise<AuthResp> {
     const result =  this.authService.register(request)
     return result
   }

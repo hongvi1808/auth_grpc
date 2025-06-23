@@ -8,22 +8,24 @@ import { UserEntity } from './modules/user/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.MYSQL_HOST,
-      port: Number(process.env.MYSQL_PORT),
-      database: process.env.MYSQL_DB_NAME,
-      username: process.env.MYSQL_USER_NAME,
-      password:process.env.MYSQL_PASSWORD,
-      // entities: [__dirname + '**/*.entity{.ts,.js}'],
-      entities: [UserEntity],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'mysql',
+        host: process.env.MYSQL_HOST,
+        port: Number(process.env.MYSQL_PORT),
+        database: process.env.MYSQL_DB_NAME,
+        username: process.env.MYSQL_USER_NAME,
+        password: process.env.MYSQL_PASSWORD,
+        // entities: [__dirname + '**/*.entity{.ts,.js}'],
+        entities: [UserEntity],
+        synchronize: true,
 
+      })
     }),
     AuthModule,
-     UserModule, 
-    ],
+    UserModule,
+  ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepo } from './user.repository';
-import { CreateUserDto } from 'proto/generated/proto/user';
+import { CreateUserDto, UserResp } from 'proto/generated/proto/user';
 import { UserEntity } from './user.entity';
 import { uuidv7 } from 'uuidv7';
 import * as bcrypt from 'bcrypt';
 import { genRandomPassword } from 'src/configs/utils';
+import { AuthExceptionFilter } from 'src/configs/auth-exception.filter';
 
 
 @Injectable()
@@ -28,8 +29,18 @@ export class UserService {
         }
         return this.userRepo.createUser(createData)
     }
-    async getUserById(id:string) {
-        return this.userRepo.getUserById(id)
+    async getUserById(id:string): Promise<UserResp> {
+        const user = await this.userRepo.getUserById(id)
+        if (!user) throw new AuthExceptionFilter('NOT_FOUND_USER', 'Khong tim thay user')
+        const result: UserResp = {
+            id: user.id,
+            fullName: user.fullName,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+            birthDate: Number(user.birthDate),
+            role: user.role || ''
+        }
+        return result
     }
     async getUserByUsername(username:string) {
         return this.userRepo.getUserByUsername(username)
