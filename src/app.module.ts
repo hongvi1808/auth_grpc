@@ -22,7 +22,6 @@ import { PermissionEnity } from './modules/permission/permission.entity';
         // entities: [__dirname + '**/*.entity{.ts,.js}'],
         entities: [UserEntity, RoleEnity, PermissionEnity],
         synchronize: true,
-        dropSchema: true,
 
       })
     }),
