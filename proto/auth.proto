@@ -6,7 +6,7 @@ service AuthService {
     rpc logIn (LoginAuthDto) returns (AuthResp);
     rpc register (RegisterAuthDto) returns (AuthResp);
     rpc refreshToken (SessionUserModel) returns (AuthResp);
-    // rpc logout (SessionUserModel) returns (bool);
+    rpc googleCallback (UserDataCallback) returns (AuthResp);
 }
 message LoginAuthDto {
     string phoneNumber = 1;
@@ -26,6 +26,11 @@ message SessionUserModel {
     string sub = 3;
     string role = 4;
     string username = 5;
+}
+message UserDataCallback {
+    string id = 1;
+    string email = 2;
+    string fullName = 3;
 }
 message AuthResp {
     string accessToken = 1;

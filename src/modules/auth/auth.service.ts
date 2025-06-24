@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthResp, LoginAuthDto, RegisterAuthDto, SessionUserModel } from 'proto/generated/proto/auth';
+import { AuthResp, LoginAuthDto, RegisterAuthDto, SessionUserModel, UserDataCallback } from 'proto/generated/proto/auth';
 import { Observable } from 'rxjs';
 import { UserService } from '../user/user.service';
 import { AuthExceptionFilter } from 'src/configs/auth-exception.filter';
@@ -58,12 +58,39 @@ export class AuthService {
 
         return { accessToken, refreshToken, expiredAt, userId: createUser.id }
     }
+    async googleCallback(body: UserDataCallback): Promise<AuthResp> {
+        let user: any;
+        user = await this.userService.getUserByUsername(body.email)
+        if (!user) {
+            user = await this.userService.createUser({
+                fullName: body.fullName,
+                phoneNumber: '',
+                email: body.email,
+                birthDate: 0,
+                role: RoleType.USER,
+            }, );
+            
+        }
+        const jwtObject: SessionUserModel = {
+            sid: uuidv7(),
+            userId: user.id,
+            sub: user.id,
+            role: user.role || '',
+            username: user.username
+        }
 
-    async refreshToken(sid: string): Promise<AuthResp> {
+        const { accessToken, expiredAt } = await this.generateAccessToken(jwtObject);
+        const refreshToken = await this.generateRefreshToken(jwtObject);
+
+        return { accessToken, refreshToken, expiredAt, userId: user.id }
+    }
+
+    async refreshToken(sUser: SessionUserModel): Promise<AuthResp> {
         // find sid in session table
-        // const { accessToken, expiredAt } = await this.generateAccessToken(userSession);
-        // const refreshToken = await this.generateRefreshToken(userSession);
-        return { accessToken:'', refreshToken:'', expiredAt:0, userId: '' }
+        sUser.sid = uuidv7()
+        const { accessToken, expiredAt } = await this.generateAccessToken(sUser);
+        const refreshToken = await this.generateRefreshToken(sUser);
+        return { accessToken, refreshToken, expiredAt, userId: sUser.userId }
     }
     private async generateAccessToken(payload: SessionUserModel): Promise<{ accessToken: string, expiredAt: number }> {
         const accessToken = await this.jwtService.signAsync(payload, {
