@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthResp, LoginAuthDto, RegisterAuthDto, SessionUserModel, UserDataCallback } from 'proto/generated/proto/auth';
+import { AuthResp, CheckPersModel, CheckResp, LoginAuthDto, RegisterAuthDto, SessionUserModel, UserDataCallback } from 'proto/generated/proto/auth';
 import { Observable } from 'rxjs';
 import { UserService } from '../user/user.service';
 import { AuthExceptionFilter } from 'src/configs/auth-exception.filter';
@@ -8,13 +8,17 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { uuidv7 } from 'uuidv7';
 import { RoleType } from 'src/configs/constants';
+import { RoleService } from '../role/role.service';
+import { PermissionService } from '../permission/permission.service';
 
 
 @Injectable()
 export class AuthService {
     constructor(private readonly userService: UserService,
         private readonly jwtService: JwtService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly roleService: RoleService,
+        private readonly persService: PermissionService,
     ) { }
     async logIn(body: LoginAuthDto): Promise<AuthResp> {
         const userFound = await this.userService.getUserByUsername(body.phoneNumber)
@@ -26,7 +30,7 @@ export class AuthService {
             sid: uuidv7(),
             userId: userFound.id,
             sub: userFound.id,
-            role: userFound.role || '',
+            role: userFound.role?.id || '',
             username: userFound.username
         }
         const { accessToken, expiredAt } = await this.generateAccessToken(jwtObject);
@@ -38,19 +42,20 @@ export class AuthService {
     async register(body: RegisterAuthDto): Promise<AuthResp> {
         const userFound = await this.userService.getUserByUsername(body.phoneNumber)
         if (userFound) throw new AuthExceptionFilter('EXISTED_USER', 'This user existed')
+        const roleId = await this.roleService.getRoleIdByName(RoleType.CUSTOMER)
         const createUser = await this.userService.createUser({
             fullName: body.fullName,
             phoneNumber: body.phoneNumber,
             email: body.email,
             birthDate: body.birthDate,
-            role: RoleType.USER,
+            role: roleId || '',
         }, body.password);
 
         const jwtObject: SessionUserModel = {
             sid: uuidv7(),
             userId: createUser.id,
             sub: createUser.id,
-            role: createUser.role || '',
+            role: roleId || '',
             username: createUser.username
         }
         const { accessToken, expiredAt } = await this.generateAccessToken(jwtObject);
@@ -62,14 +67,15 @@ export class AuthService {
         let user: any;
         user = await this.userService.getUserByUsername(body.email)
         if (!user) {
+            const roleId = await this.roleService.getRoleIdByName(RoleType.CUSTOMER)
             user = await this.userService.createUser({
                 fullName: body.fullName,
                 phoneNumber: '',
                 email: body.email,
                 birthDate: 0,
-                role: RoleType.USER,
-            }, );
-            
+                role: roleId,
+            },);
+
         }
         const jwtObject: SessionUserModel = {
             sid: uuidv7(),
@@ -91,6 +97,14 @@ export class AuthService {
         const { accessToken, expiredAt } = await this.generateAccessToken(sUser);
         const refreshToken = await this.generateRefreshToken(sUser);
         return { accessToken, refreshToken, expiredAt, userId: sUser.userId }
+    }
+    async checkPermission(request: CheckPersModel): Promise<CheckResp> {
+        const adminId = await this.roleService.getRoleIdAdmin()
+        if (adminId === request.role) return {denied: false}
+        const result = await this.persService.getPersByRoleIdAndUrl(request.role, request.url);
+
+        if (result) return {denied: false}
+        return {denied: true}
     }
     private async generateAccessToken(payload: SessionUserModel): Promise<{ accessToken: string, expiredAt: number }> {
         const accessToken = await this.jwtService.signAsync(payload, {

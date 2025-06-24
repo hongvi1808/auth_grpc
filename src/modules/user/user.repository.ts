@@ -15,9 +15,9 @@ export class UserRepo {
     }
 
     async getUserById(id:string) {
-        return this.userRepo.findOneBy({id})
+        return this.userRepo.findOneBy({id, alive: true})
     }
     async getUserByUsername(username:string) {
-        return this.userRepo.findOneBy({username})
+        return this.userRepo.findOneBy({username, alive: true})
     }
 }

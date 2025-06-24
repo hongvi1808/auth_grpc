@@ -7,6 +7,7 @@ service AuthService {
     rpc register (RegisterAuthDto) returns (AuthResp);
     rpc refreshToken (SessionUserModel) returns (AuthResp);
     rpc googleCallback (UserDataCallback) returns (AuthResp);
+    rpc checkPermission (CheckPersModel) returns (CheckResp);
 }
 message LoginAuthDto {
     string phoneNumber = 1;
@@ -31,6 +32,13 @@ message UserDataCallback {
     string id = 1;
     string email = 2;
     string fullName = 3;
+}
+message CheckResp {
+    bool denied = 1;
+}
+message CheckPersModel {
+    string role = 1;
+    string url = 2;
 }
 message AuthResp {
     string accessToken = 1;

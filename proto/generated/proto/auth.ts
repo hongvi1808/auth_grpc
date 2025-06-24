@@ -37,6 +37,15 @@ export interface UserDataCallback {
   fullName: string;
 }
 
+export interface CheckResp {
+  denied: boolean;
+}
+
+export interface CheckPersModel {
+  role: string;
+  url: string;
+}
+
 export interface AuthResp {
   accessToken: string;
   refreshToken: string;
@@ -56,6 +65,8 @@ export interface AuthServiceClient {
   refreshToken(request: SessionUserModel): Observable<AuthResp>;
 
   googleCallback(request: UserDataCallback): Observable<AuthResp>;
+
+  checkPermission(request: CheckPersModel): Observable<CheckResp>;
 }
 
 /** AUTH SERVICE */
@@ -68,11 +79,13 @@ export interface AuthServiceController {
   refreshToken(request: SessionUserModel): Promise<AuthResp> | Observable<AuthResp> | AuthResp;
 
   googleCallback(request: UserDataCallback): Promise<AuthResp> | Observable<AuthResp> | AuthResp;
+
+  checkPermission(request: CheckPersModel): Promise<CheckResp> | Observable<CheckResp> | CheckResp;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["logIn", "register", "refreshToken", "googleCallback"];
+    const grpcMethods: string[] = ["logIn", "register", "refreshToken", "googleCallback", "checkPermission"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

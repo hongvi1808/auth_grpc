@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthResp, AuthServiceController, AuthServiceControllerMethods, LoginAuthDto, RegisterAuthDto, SessionUserModel, UserDataCallback } from 'proto/generated/proto/auth';
+import { AuthResp, AuthServiceController, AuthServiceControllerMethods, CheckPersModel, CheckResp, LoginAuthDto, RegisterAuthDto, SessionUserModel, UserDataCallback } from 'proto/generated/proto/auth';
 import { Observable } from 'rxjs';
 
 @Controller('auth')
@@ -19,6 +19,10 @@ export class AuthController implements AuthServiceController {
   async refreshToken(request: SessionUserModel): Promise<AuthResp> {
     const result = await this.authService.refreshToken(request)
     return result;
+  }
+  async checkPermission(request: CheckPersModel): Promise<CheckResp>{
+    const result = await this.authService.checkPermission(request)
+    return result
   }
   async googleCallback(request: UserDataCallback): Promise<AuthResp> {
      const result = await this.authService.googleCallback(request)

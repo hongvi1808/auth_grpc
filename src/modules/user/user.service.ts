@@ -21,6 +21,7 @@ export class UserService {
             phoneNumber: data.phoneNumber,
             email: data.email,
             hash,
+            roleId: data.role,
             birthDate: data.birthDate,
             createdBy: data.phoneNumber || data.email || '',
             updatedBy: data.phoneNumber || data.email || '',
@@ -38,7 +39,7 @@ export class UserService {
             phoneNumber: user.phoneNumber,
             email: user.email,
             birthDate: Number(user.birthDate),
-            role: user.role || ''
+            role: user.role?.id || ''
         }
         return result
     }

@@ -1,8 +1,10 @@
+import { BaseSystemEntity } from "src/configs/base.entity";
 import { RoleType } from "src/configs/constants";
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { RoleEnity } from "../role/role.entity";
 
 @Entity({ name: 'user' })
-export class UserEntity {
+export class UserEntity extends BaseSystemEntity {
     @PrimaryColumn()
     id: string;
 
@@ -24,24 +26,11 @@ export class UserEntity {
     @Column({ name: 'birth-date',type:'bigint', nullable: true })
     birthDate?: number;
 
-    @Column({ enum: RoleType, default: RoleType.USER})
-    role?: string
+    @Column()
+    roleId : string
 
-    @Column({ name: 'create-at',  type:'bigint' })
-    createdAt: number;
+    @ManyToOne(() => RoleEnity, (role) => role.users, {eager: true, cascade: true},)
+    @JoinColumn({name: 'roleId'})
+    role?: RoleEnity
 
-    @Column({ name: 'create-by' })
-    createdBy: string;
-
-    @Column({ name: 'update-at', type:'bigint'})
-    updatedAt: number;
-
-    @Column({ name: 'update-by', })
-    updatedBy: string;
-
-    @Column({default: true })
-    active?: boolean;
-
-    @Column({default: true })
-    alive?: boolean;
 }
